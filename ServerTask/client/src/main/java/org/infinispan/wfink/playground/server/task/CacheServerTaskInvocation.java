@@ -3,6 +3,7 @@
  */
 package org.infinispan.wfink.playground.server.task;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -50,7 +51,9 @@ public class CacheServerTaskInvocation {
     customCache.put("4", "4");
 
     System.out.println("Check '4' -> " + customCache.get("4"));
-    Object returnFromTask = customCache.execute("CacheEntryCounterTask", null);
+    HashMap<String, String> param = new HashMap<String, String>();
+    param.put("manager", "size"); // key 'manager' will force getCacheManger() value 'size' will additionally call size()
+    Object returnFromTask = customCache.execute("CacheEntryCounterTask", param);
     logger.finest("Object returned by execute is " + returnFromTask.getClass());
     if (returnFromTask instanceof List) {
       System.out.println("The server side task is running in ALL_NODES mode");
