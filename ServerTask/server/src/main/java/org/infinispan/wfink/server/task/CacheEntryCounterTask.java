@@ -1,7 +1,9 @@
 package org.infinispan.wfink.server.task;
 
+import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
+import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.tasks.ServerTask;
 import org.infinispan.tasks.TaskContext;
 import org.infinispan.tasks.TaskExecutionMode;
@@ -28,7 +30,15 @@ public class CacheEntryCounterTask implements ServerTask<String> {
     log.info("CacheEntryCounterTask called");
     log.info("Subject from context : " + this.context.getSubject());
     Cache<String, String> cache = (Cache<String, String>) context.getCache().get();
-    int size = cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+    log.info("after context.getCache");
+    EmbeddedCacheManager cacheManager = cache.getCacheManager();
+    log.info("after cache.getCacheManager");
+    int size = -1;
+    AdvancedCache<String, String> advancedCache = cache.getAdvancedCache();
+    AdvancedCache<String, String> withFlags = advancedCache.withFlags(Flag.CACHE_MODE_LOCAL);
+    size = withFlags.size();
+//    size = cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
+    log.info("after size()");
     return "CacheEntryCounterTask cache.size=" + size;
   }
 
@@ -47,6 +57,7 @@ public class CacheEntryCounterTask implements ServerTask<String> {
 
   @Override
   public TaskExecutionMode getExecutionMode() {
+    log.info("getExecutionMode");
     return TaskExecutionMode.ALL_NODES;
   }
 }

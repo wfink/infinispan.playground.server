@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.commons.marshall.JavaSerializationMarshaller;
 
 /**
  * Add some entries to a cache and invoke the server side task registered as 'CacheEntryCounterTask' to count the entries owned by a node.
@@ -33,8 +34,9 @@ public class CacheServerTaskInvocation {
 
     ConfigurationBuilder remoteBuilder = new ConfigurationBuilder();
     remoteBuilder.addServers("127.0.0.1:11222");
-    remoteBuilder.security().authentication().username("wfink").password("wfink42");
-//    remoteBuilder.marshaller(new JavaSerializationMarshaller()).addJavaSerialWhiteList("java.util.*"); // needed because of ISPN-14131
+    remoteBuilder.security().authentication().saslMechanism("PLAIN").serverName("server").username("wfink").password("wfink42");
+    remoteBuilder.marshaller(new JavaSerializationMarshaller()); // needed because of ISPN-14131
+    remoteBuilder.addJavaSerialWhiteList("java.util.*");
 
     RemoteCacheManager remoteCacheManager = new RemoteCacheManager(remoteBuilder.build(), true);
 

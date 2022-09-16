@@ -38,7 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 	<!-- Infinispan version -->
-        <version.org.infinispan>13.0.10.Final</version.org.infinispan>
+        <version.org.infinispan>9.4.0.Final</version.org.infinispan>
 
         <!-- other plugin versions -->
 
