@@ -1,5 +1,8 @@
 package org.infinispan.wfink.server.task;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
 import org.infinispan.context.Flag;
@@ -27,19 +30,26 @@ public class CacheEntryCounterTask implements ServerTask<String> {
 
   @Override
   public String call() throws Exception {
-    log.info("CacheEntryCounterTask called");
+    int size = -1;
+    Map<String, ?> params = new HashMap();
+    if (this.context.getParameters().isPresent())
+      params = this.context.getParameters().get();
+    log.info("CacheEntryCounterTask called parameters: " + params);
     log.info("Subject from context : " + this.context.getSubject());
     Cache<String, String> cache = (Cache<String, String>) context.getCache().get();
     log.info("after context.getCache");
-    EmbeddedCacheManager cacheManager = cache.getCacheManager();
-    log.info("after cache.getCacheManager");
-    int size = -1;
-    AdvancedCache<String, String> advancedCache = cache.getAdvancedCache();
-    AdvancedCache<String, String> withFlags = advancedCache.withFlags(Flag.CACHE_MODE_LOCAL);
-    size = withFlags.size();
-//    size = cache.getAdvancedCache().withFlags(Flag.CACHE_MODE_LOCAL).size();
-    log.info("after size()");
-    return "CacheEntryCounterTask cache.size=" + size;
+
+    if (params.containsKey("manager")) {
+      EmbeddedCacheManager cacheManager = cache.getCacheManager();
+      log.info("after cache.getCacheManager");
+      if (params.get("manager").equals("size")) {
+        AdvancedCache<String, String> advancedCache = cache.getAdvancedCache();
+        AdvancedCache<String, String> withFlags = advancedCache.withFlags(Flag.CACHE_MODE_LOCAL);
+        size = withFlags.size();
+      }
+      log.info("after size() = " + size);
+    }
+    return "CacheEntryCounterTask end size=" + size;
   }
 
   @Override

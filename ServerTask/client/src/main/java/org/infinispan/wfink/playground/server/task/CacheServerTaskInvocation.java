@@ -3,13 +3,13 @@
  */
 package org.infinispan.wfink.playground.server.task;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
-import org.infinispan.commons.marshall.JavaSerializationMarshaller;
 
 /**
  * Add some entries to a cache and invoke the server side task registered as 'CacheEntryCounterTask' to count the entries owned by a node.
@@ -35,8 +35,6 @@ public class CacheServerTaskInvocation {
     ConfigurationBuilder remoteBuilder = new ConfigurationBuilder();
     remoteBuilder.addServers("127.0.0.1:11222");
     remoteBuilder.security().authentication().saslMechanism("PLAIN").serverName("server").username("wfink").password("wfink42");
-    remoteBuilder.marshaller(new JavaSerializationMarshaller()); // needed because of ISPN-14131
-    remoteBuilder.addJavaSerialWhiteList("java.util.*");
 
     RemoteCacheManager remoteCacheManager = new RemoteCacheManager(remoteBuilder.build(), true);
 
@@ -52,7 +50,9 @@ public class CacheServerTaskInvocation {
     customCache.put("4", "4");
 
     System.out.println("Check '4' -> " + customCache.get("4"));
-    Object returnFromTask = customCache.execute("CacheEntryCounterTask", null);
+    HashMap<String, String> param = new HashMap<String, String>();
+    param.put("manager", "size"); // key 'manager' will force getCacheManger() value 'size' will additionally call size()
+    Object returnFromTask = customCache.execute("CacheEntryCounterTask", param);
     logger.finest("Object returned by execute is " + returnFromTask.getClass());
     if (returnFromTask instanceof List) {
       System.out.println("The server side task is running in ALL_NODES mode");
